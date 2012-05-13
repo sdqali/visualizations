@@ -12,7 +12,7 @@ players.each do |p|
   p[:performances] = []
   trs.map do |tr|
     tds = tr.search("td")
-    next if tds.text.include? "Unused Substitute"
+
     performance = {
       :date => tds[0].text,
       :team => tds[1].text,
@@ -20,17 +20,23 @@ players.each do |p|
       :opponent => tds[2].search("a").first.text,
       :competition => tds[3].text,
       :result => tds[4].text.split(" ").first,
-      :score => tds[4].text.split(" ").last,
-      :appearance => tds[5].text,
-      :goals => tds[6].text.to_i,
-      :assists => tds[7].text.to_i,
-      :shots => tds[8].text.to_i,
-      :shots_on_goal => tds[9].text.to_i,
-      :fouls_committed => tds[10].text.to_i,
-      :fouls_suffered => tds[11].text.to_i,
-      :yellow_cards => tds[12].text.to_i,
-      :red_cards => tds[13].text.to_i
+      :score => tds[4].text.split(" ").last
     }
+    if tds.text.include? "Unused Substitute"
+      p[:performances] << performance
+      next
+    end
+    performance.merge({
+                        :appearance => tds[5].text,
+                        :goals => tds[6].text.to_i,
+                        :assists => tds[7].text.to_i,
+                        :shots => tds[8].text.to_i,
+                        :shots_on_goal => tds[9].text.to_i,
+                        :fouls_committed => tds[10].text.to_i,
+                        :fouls_suffered => tds[11].text.to_i,
+                        :yellow_cards => tds[12].text.to_i,
+                        :red_cards => tds[13].text.to_i
+    })
     p[:performances] << performance
   end
 end
