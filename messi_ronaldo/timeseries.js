@@ -6,8 +6,7 @@ var colorMap = {
 	"Lionel Messi": "#637939"
 };
 
-var Timeseries = function() {
-};
+var Timeseries = function() {};
 
 
 Timeseries.prototype.draw = function(className) {
@@ -16,39 +15,36 @@ Timeseries.prototype.draw = function(className) {
 		var maxGames = maxGamesAmong(players);
 		var maxGoals = maxGoalsAmong(players);
 
-		var yAxisScale = d3.scale.linear()
-		.domain([0, maxGoals])
-		.range([h - 2 * padding, 2 * padding]);
+		var yAxisScale = d3.scale.linear().domain([0, maxGoals]).range([h - 2 * padding, 2 * padding]);
 
-		var xScale = d3.scale.linear()
-		.domain([0, maxGames])
-		.range([2 * padding, w - padding]);
+		var xAxisScale = d3.scale.linear().domain([0, maxGames]).range([2 * padding, w - padding]);
 
-		var radiusScale = d3.scale.linear()
-		.domain([0, maxGoals])
-		.range([1, maxGoals]);
+		var radiusScale = d3.scale.linear().domain([0, maxGoals]).range([1, maxGoals]);
 
 		players.forEach(function(player) {
 			var performances = sanitize(player.performances);
-			var circles = vis.append("g")
-			.selectAll("circle")
-			.data(performances)
-			.enter()
-			.append("circle")
-			.attr("cx", function(d, i) { return xScale(i); })
-			.attr("cy", function(d, i) {
+			var circles = vis.append("g").selectAll("circle").data(performances).enter().append("circle").attr("cx", function(d, i) {
+				return xAxisScale(i);
+			}).attr("cy", function(d, i) {
 				var ps = performances.slice(0, i + 1);
 				var val = ps.reduce(function(a, b) {
-					return {goals: a.goals + b.goals}
+					return {
+						goals: a.goals + b.goals
+					}
 				}).goals;
 				return yAxisScale(val);
-			})
-			.attr("r", 2)
-			.attr("fill", colorMap[player.name]);
+			}).attr("r", 2).attr("fill", colorMap[player.name]);
 
-			circles.append("title").text(function(d) {return prettyText(d)});
-			var axes = new Axis(vis);
-			axes.draw(padding, "Games", "Cumulative Goals", xScale, yAxisScale);
+			circles.append("title").text(function(d) {
+				return prettyText(d)
+			});
+			var axes = new Axis(vis)
+			.withPadding(padding)
+			.withXScale(xAxisScale)
+			.withYScale(yAxisScale)
+			.withXLabelText("Games")
+			.withYLabelText("Cumulative Goals");
+			axes.draw();
 		});
 
 	});
@@ -58,14 +54,18 @@ function maxGoalsAmong(players) {
 	var goals = players.map(function(p) {
 		return totalGoalsBy(p);
 	});
-	return d3.max(goals, function(d) {return d;});
+	return d3.max(goals, function(d) {
+		return d;
+	});
 };
 
 function maxGamesAmong(players) {
 	var games = players.map(function(p) {
 		return p.performances.length
 	});
-	return d3.max(games, function(d) {return d;});
+	return d3.max(games, function(d) {
+		return d;
+	});
 };
 
 function totalGoalsBy(player) {
@@ -75,10 +75,7 @@ function totalGoalsBy(player) {
 }
 
 function createSkelton(className) {
-	return d3.select("." + className)
-	.append("svg")
-	.attr("width", w)
-	.attr("height", h);
+	return d3.select("." + className).append("svg").attr("width", w).attr("height", h);
 };
 
 function sanitize(performances) {
@@ -87,7 +84,6 @@ function sanitize(performances) {
 	});
 };
 
-function prettyText (p) {
-	return [p.date, p.opponent, p.competition].join(", ") + 
-	" Goals: " + p.goals + ",Assists: " + p.assists;
+function prettyText(p) {
+	return [p.date, p.opponent, p.competition].join(", ") + " Goals: " + p.goals + ",Assists: " + p.assists;
 };
