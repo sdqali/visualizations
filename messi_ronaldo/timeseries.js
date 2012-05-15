@@ -1,5 +1,5 @@
 var w = 1000;
-var h = 500;
+var h = 600;
 var padding = 30;
 var colorMap = {
 	"Cristiano Ronaldo": "#1f77b4",
@@ -13,25 +13,23 @@ var Timeseries = function() {
 Timeseries.prototype.draw = function(className) {
 	var vis = createSkelton(className);
 	d3.json("data/processed_data.json", function(players) {
-		
+		var maxGames = maxGamesAmong(players);
+		var maxGoals = maxGoalsAmong(players);
+
+		var yAxisScale = d3.scale.linear()
+		.domain([0, maxGoals])
+		.range([h - 2 * padding, 2 * padding]);
+
+		var xScale = d3.scale.linear()
+		.domain([0, maxGames])
+		.range([2 * padding, w - padding]);
+
+		var radiusScale = d3.scale.linear()
+		.domain([0, maxGoals])
+		.range([1, maxGoals]);
+
 		players.forEach(function(player) {
 			var performances = sanitize(player.performances);
-			var xScale = d3.scale.linear()
-			.domain([0, performances.length])
-			.range([2 * padding, w - padding]);
-
-			var totalGoals = performances.reduce(function(a, b){
-				return {"goals": (a.goals + b.goals)};
-			}).goals;
-			var yScale = d3.scale.linear()
-			.domain([0, totalGoals])
-			.range([h - 2 * padding, padding]);
-
-			var maxGoals = d3.max(performances, function(p) {return p.goals;})
-			var radiusScale = d3.scale.linear()
-			.domain([0, maxGoals])
-			.range([1, maxGoals]);
-
 			var circles = vis.append("g")
 			.selectAll("circle")
 			.data(performances)
@@ -43,20 +41,37 @@ Timeseries.prototype.draw = function(className) {
 				var val = ps.reduce(function(a, b) {
 					return {goals: a.goals + b.goals}
 				}).goals;
-				return yScale(val);
+				return yAxisScale(val);
 			})
-			.attr("r", function(d) {return radiusScale(d.goals);})
+			.attr("r", 2)
 			.attr("fill", colorMap[player.name]);
 
 			circles.append("title").text(function(d) {return prettyText(d)});
+			var axes = new Axis(vis);
+			axes.draw(padding, "Games", "Cumulative Goals", xScale, yAxisScale);
 		});
-});
+
+	});
 };
 
-function totalGoals(player) {
-	return player.performances.reduce(function(a, b) {
-		return {goals: a.goals + b.goals};
-	}).goals
+function maxGoalsAmong(players) {
+	var goals = players.map(function(p) {
+		return totalGoalsBy(p);
+	});
+	return d3.max(goals, function(d) {return d;});
+};
+
+function maxGamesAmong(players) {
+	var games = players.map(function(p) {
+		return p.performances.length
+	});
+	return d3.max(games, function(d) {return d;});
+};
+
+function totalGoalsBy(player) {
+	return d3.sum(player.performances.map(function(a) {
+		return a.goals;
+	}));
 }
 
 function createSkelton(className) {
@@ -75,4 +90,4 @@ function sanitize(performances) {
 function prettyText (p) {
 	return [p.date, p.opponent, p.competition].join(", ") + 
 	" Goals: " + p.goals + ",Assists: " + p.assists;
-}
+};
