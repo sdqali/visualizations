@@ -11,7 +11,10 @@
     <div class="vis">
     </div>
     <script type="text/javascript">
-      new Timeseries().draw("vis");
+      var timeseries = new Timeseries("data/processed_data.json");
+      timeseries.draw("vis", function(performance){
+        return performance.goals;
+      });
     </script>
   </body>
 </html>

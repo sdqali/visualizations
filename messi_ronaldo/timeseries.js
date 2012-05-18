@@ -6,12 +6,16 @@ var colorMap = {
     "Lionel Messi": "#98DBED"
 };
 
-var Timeseries = function() {};
+var Timeseries = function(jsonFile) {
+    this.jsonFile = jsonFile;
+};
 
+var scoreFunction;
 
-Timeseries.prototype.draw = function(className) {
+Timeseries.prototype.draw = function(className, scorer) {
+    scoreFunction = scorer;
     var vis = createSkelton(className);
-    d3.json("data/processed_data.json", function(players) {
+    d3.json(this.jsonFile, function(players) {
 		var maxGames = maxGamesAmong(players);
 		var maxGoals = maxGoalsAmong(players);
 
@@ -33,12 +37,10 @@ Timeseries.prototype.draw = function(className) {
 					      })
 					.attr("cy", function(d, i) {
 							  var ps = performances.slice(0, i + 1);
-							  var val = ps.reduce(function(a, b) {
-										  return {
-										      goals: a.goals + b.goals
-										  };
-									      }).goals;
-							  return yAxisScale(val);
+							  var score = d3.sum(ps, function(d){
+									       return scoreFunction(d);
+									   });
+							  return yAxisScale(score);
 					      })
 					.attr("r", 2)
 					.attr("stroke",  colorMap[player.name])
@@ -80,17 +82,20 @@ function maxGamesAmong(players) {
 
 function totalGoalsBy(player) {
     return d3.sum(player.performances.map(function(a) {
-					      return a.goals;
+					      return scoreFunction(a);
 					  }));
 }
 
 function createSkelton(className) {
-    return d3.select("." + className).append("svg").attr("width", w).attr("height", h);
+    return d3.select("." + className)
+	.append("svg")
+	.attr("width", w)
+	.attr("height", h);
 };
 
 function sanitize(performances) {
     return performances.filter(function(d) {
-				   return d.goals != null;
+				   return scoreFunction(d) != null;
 			       });
 };
 
