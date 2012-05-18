@@ -12,7 +12,7 @@ var Timeseries = function(jsonFile) {
 
 var scoreFunction;
 
-Timeseries.prototype.draw = function(className, scorer) {
+Timeseries.prototype.draw = function(className, labels, scorer) {
     scoreFunction = scorer;
     var vis = createSkelton(className);
     d3.json(this.jsonFile, function(players) {
@@ -54,8 +54,8 @@ Timeseries.prototype.draw = function(className, scorer) {
 					.withPadding(padding)
 					.withXScale(xAxisScale)
 					.withYScale(yAxisScale)
-					.withXLabelText("Games")
-					.withYLabelText("Cumulative Goals");
+					.withXLabelText(labels.xlabel)
+					.withYLabelText(labels.ylabel);
 				    axes.draw();
 				});
 
