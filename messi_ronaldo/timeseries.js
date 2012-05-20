@@ -12,10 +12,11 @@ var Timeseries = function(jsonFile) {
 
 var scoreFunction;
 
-Timeseries.prototype.draw = function(className, labels, scorer) {
-    scoreFunction = scorer;
+Timeseries.prototype.draw = function(className, labels, scoreF, filterF) {
+    scoreFunction = scoreF;
     var vis = createSkelton(className);
     d3.json(this.jsonFile, function(players) {
+		players = sanitize(players, filterF);
 		var maxGames = maxGamesAmong(players);
 		var maxGoals = maxGoalsAmong(players);
 
@@ -32,7 +33,7 @@ Timeseries.prototype.draw = function(className, labels, scorer) {
 		    .range([1, maxGoals]);
 
 		players.forEach(function(player) {
-				    var performances = sanitize(player.performances);
+				    var performances = player.performances;
 				    var circles = vis.append("g")
 					.selectAll("circle")
 					.data(performances)
@@ -106,10 +107,17 @@ function createSkelton(className) {
 	.attr("height", h);
 };
 
-function sanitize(performances) {
-    return performances.filter(function(d) {
-				   return scoreFunction(d) != null;
-			       });
+function sanitize(players, filterF) {
+    players.forEach(function(player) {
+			var ps = player.performances.filter(function(pr) {
+								return scoreFunction(pr) != null;
+							    });
+			if(filterF) {
+			    ps = ps.filter(filterF);
+			};
+			player.performances = ps;
+		    });
+    return players;
 };
 
 function prettyText(p) {
