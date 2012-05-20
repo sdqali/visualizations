@@ -1,0 +1,61 @@
+<html>
+  <head>
+    <title>Leo Messi vs C Ronaldo</title>
+    <script type="text/javascript" src="d3.v2.js"></script>
+    <script type="text/javascript" src="utils.js"></script>
+    <script type="text/javascript" src="axes.js"></script>
+    <script type="text/javascript" src="timeseries.js"></script>
+    <link type="text/css" rel="stylesheet" href="stylesheet.css"></link>
+  </head>
+  <body>
+    <div class="controls">
+      <input type="button" value="Assists + Goals" onClick="drawGaolsAndAssists();" />
+      <input type="button" value="Goals" onClick="drawGoals();" />
+      <input type="button" value="Assists" onClick="drawAssists();" />
+    </div>
+
+    <div class="vis">
+    </div>
+
+    <script type="text/javascript">
+      var timeseries = new Timeseries("data/processed_data.json");
+      var spanishFilter = function(performance){
+          return ["Barcelona", "Real Madrid"].indexOf(performance.team) != -1;
+        };
+      function drawGoals() {
+          makeSpace();
+          timeseries.draw("vis", {xlabel: "Matches", ylabel: "Cumulative Goals"},
+			  function(performance){
+			      return performance.goals;
+			  },
+                          spanishFilter);
+      };
+
+      function drawAssists() {
+        makeSpace();
+        timeseries.draw("vis", {xlabel: "Matches", ylabel: "Cumulative Assists"},
+			function(performance){
+			    return performance.assists;
+			},
+			spanishFilter);
+      };
+
+      function drawGaolsAndAssists() {
+        makeSpace();
+        timeseries.draw("vis", {xlabel: "Matches", ylabel: "Cumulative Asists + Goals"},
+			function(performance){
+			    return performance.assists + performance.goals;
+			},
+			spanishFilter);
+      };
+
+      function makeSpace() {
+        d3.select(".vis")
+         .selectAll("svg")
+         .remove();
+      };
+
+      drawGaolsAndAssists();
+    </script>
+  </body>
+</html>
