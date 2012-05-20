@@ -19,11 +19,17 @@ Timeseries.prototype.draw = function(className, labels, scorer) {
 		var maxGames = maxGamesAmong(players);
 		var maxGoals = maxGoalsAmong(players);
 
-		var yAxisScale = d3.scale.linear().domain([0, maxGoals]).range([h - 2 * padding, 2 * padding]);
+		var yAxisScale = d3.scale.linear()
+		    .domain([0, maxGoals])
+		    .range([h - 2 * padding, 2 * padding]);
 
-		var xAxisScale = d3.scale.linear().domain([0, maxGames]).range([2 * padding, w - padding]);
+		var xAxisScale = d3.scale.linear()
+		    .domain([0, maxGames])
+		    .range([2 * padding, w - padding]);
 
-		var radiusScale = d3.scale.linear().domain([0, maxGoals]).range([1, maxGoals]);
+		var radiusScale = d3.scale.linear()
+		    .domain([0, maxGoals])
+		    .range([1, maxGoals]);
 
 		players.forEach(function(player) {
 				    var performances = sanitize(player.performances);
