@@ -63,6 +63,13 @@ Timeseries.prototype.draw = function(className, labels, scorer) {
 					.withXLabelText(labels.xlabel)
 					.withYLabelText(labels.ylabel);
 				    axes.draw();
+
+				    var legend = vis.append("g");
+				    legend.append("text")
+					.text(player.name)
+					.attr("fill", colorMap[player.name]);
+				    legend.attr("transform",
+						"translate(" + 4 * padding + "," +  (3 + players.indexOf(player)) * padding/2 +")");
 				});
 
 	    });
@@ -70,7 +77,7 @@ Timeseries.prototype.draw = function(className, labels, scorer) {
 
 function maxGoalsAmong(players) {
     var goals = players.map(function(p) {
-				return totalGoalsBy(p);
+				return totalScoreBy(p);
 			    });
     return d3.max(goals, function(d) {
 		      return d;
@@ -86,7 +93,7 @@ function maxGamesAmong(players) {
 		  });
 };
 
-function totalGoalsBy(player) {
+function totalScoreBy(player) {
     return d3.sum(player.performances.map(function(a) {
 					      return scoreFunction(a);
 					  }));
